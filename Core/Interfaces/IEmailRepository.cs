@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.Interfaces
 {
-    public interface IMembershipRepository
+    public interface IEmailRepository
     {
-        public Task<bool> ActivateMembership(Order order);
-        public Task<bool> UpgradeMembership(Order order);
+        public Task<bool> SendActivationMail(Order order);
+        public Task<bool> SendUpgradeMail(Order order);
     }
 }

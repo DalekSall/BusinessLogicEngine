@@ -21,14 +21,16 @@ namespace UnitTests
         private Mock<IPackageSlipRepository> packageSlipMock;
         private Mock<IPackageSlipRepository> royaltySlipMock;
         private Mock<IMembershipRepository> membershipMock;
+        private Mock<IEmailRepository> emailMock;
         private async Task<OrderEngine> CreateOrderEngine()
         {
             packageSlipMock = new Mock<IPackageSlipRepository>();
             royaltySlipMock = new Mock<IPackageSlipRepository>();
             membershipMock = new Mock<IMembershipRepository>();
+            emailMock = new Mock<IEmailRepository>();
             var orderSlipHandler = new OrderSlipHandler(packageSlipMock.Object);
             var royaltySlipHandler = new RoyaltySlipHandler(royaltySlipMock.Object);
-            var memberShipHandler = new MembershipHandler(membershipMock.Object);
+            var memberShipHandler = new MembershipHandler(membershipMock.Object, emailMock.Object);
 
             await orderSlipHandler.SetNext(memberShipHandler);
             await royaltySlipHandler.SetNext(orderSlipHandler);
@@ -143,6 +145,57 @@ namespace UnitTests
             // assert
             membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Never);
             packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Once);
+        }
+
+        [Fact]
+        public async void ShouldUpgradeMembershipIfOrderContainsMembershipUpgrade()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.Upgrade);
+
+            // act
+            var orderEngine = await CreateOrderEngine();
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Never);
+            membershipMock.Verify(mock => mock.UpgradeMembership(order), Times.Once);
+        }
+
+        [Fact]
+        public async void ShouldEmailCustomerIfMembershipIsEnabled()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
+            membershipMock.Setup(mock => mock.ActivateMembership(order)).ReturnsAsync(true);
+
+            // act
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Once);
+            emailMock.Verify(mock => mock.SendActivationMail(order), Times.Once);
+            membershipMock.Verify(mock => mock.UpgradeMembership(order), Times.Never);
+            emailMock.Verify(mock => mock.SendUpgradeMail(order), Times.Never);
+        }
+
+        [Fact]
+        public async void ShouldEmailCustomerIfMembershipIsUpgraded()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.Upgrade);
+            var orderEngine = await CreateOrderEngine();
+            membershipMock.Setup(mock => mock.UpgradeMembership(order)).ReturnsAsync(true);
+
+            // act
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Never);
+            emailMock.Verify(mock => mock.SendActivationMail(order), Times.Never);
+            membershipMock.Verify(mock => mock.UpgradeMembership(order), Times.Once);
+            emailMock.Verify(mock => mock.SendUpgradeMail(order), Times.Once);
         }
     }
 }

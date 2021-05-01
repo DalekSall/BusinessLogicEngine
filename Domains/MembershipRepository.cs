@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 
 namespace Domains
 {
-    class MembershipRepository : IMembershipRepository
+    public class MembershipRepository : IMembershipRepository
     {
-    public Task<bool> ActivateMembership(Order order)
+        public async Task<bool> ActivateMembership(Order order)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> UpgradeMembership(Order order)
         {
             throw new NotImplementedException();
         }

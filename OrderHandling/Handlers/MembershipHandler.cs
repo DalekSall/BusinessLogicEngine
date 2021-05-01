@@ -11,20 +11,60 @@ namespace OrderHandling.Handlers
     public class MembershipHandler : AbstractHandler
     {
         private readonly IMembershipRepository membershipRepository;
+        private readonly IEmailRepository emailRepository;
 
-        public MembershipHandler (IMembershipRepository membershipRepository)
+        public MembershipHandler (IMembershipRepository membershipRepository, IEmailRepository emailRepository)
         {
             this.membershipRepository = membershipRepository;
+            this.emailRepository = emailRepository;
         }
 
         public async override Task<Order> HandleOrder (Order order)
         {
-            var memberShips = order.Products.ToList().Where(product => product.productType == Core.Enums.ProductTypes.Membership);
+            var memberShips = order.Products.ToList().Where( product => 
+                product.productType == Core.Enums.ProductTypes.Membership &&
+                product.productSubType != Core.Enums.ProductSubTypes.Upgrade
+            );
+
             if (memberShips.Any())
             {
-                await membershipRepository.ActivateMembership(order);
+                await handleActivation(order);
+
             }
+
+            var upgrades = order.Products.ToList().Where( product => 
+                product.productType == Core.Enums.ProductTypes.Membership &&
+                product.productSubType == Core.Enums.ProductSubTypes.Upgrade
+            );
+
+            if(upgrades.Any())
+            {
+                await handleUpgrade(order);
+            }
+            
             return await base.HandleOrder(order);
+        }
+
+        private async Task<bool> handleActivation (Order order)
+        {
+            var activated = await membershipRepository.ActivateMembership(order);
+            if(activated)
+            {
+                return await emailRepository.SendActivationMail(order);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> handleUpgrade(Order order)
+        {
+            var upgraded = await membershipRepository.UpgradeMembership(order);
+            if(upgraded)
+            {
+                return await emailRepository.SendUpgradeMail(order);
+            }
+
+            return false;
         }
     }
 }
