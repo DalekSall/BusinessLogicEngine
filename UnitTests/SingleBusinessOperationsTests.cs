@@ -20,13 +20,17 @@ namespace UnitTests
         // we use the same repo, but will configure it differently in DIC
         private Mock<IPackageSlipRepository> packageSlipMock;
         private Mock<IPackageSlipRepository> royaltySlipMock;
+        private Mock<IMembershipRepository> membershipMock;
         private async Task<OrderEngine> CreateOrderEngine()
         {
             packageSlipMock = new Mock<IPackageSlipRepository>();
             royaltySlipMock = new Mock<IPackageSlipRepository>();
+            membershipMock = new Mock<IMembershipRepository>();
             var orderSlipHandler = new OrderSlipHandler(packageSlipMock.Object);
             var royaltySlipHandler = new RoyaltySlipHandler(royaltySlipMock.Object);
+            var memberShipHandler = new MembershipHandler(membershipMock.Object);
 
+            await orderSlipHandler.SetNext(memberShipHandler);
             await royaltySlipHandler.SetNext(orderSlipHandler);
             return new OrderEngine(royaltySlipHandler);
         }
@@ -108,6 +112,37 @@ namespace UnitTests
             // assert
             packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
             royaltySlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
+        }
+
+        [Fact]
+        public async void ShouldActivateAccountIfOrderContainsAMembership()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+
+            // act
+            var orderEngine = await CreateOrderEngine();
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Once);
+            packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
+            royaltySlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
+        }
+
+        [Fact]
+        public async void ShouldNotActivateAccountIfOrderContainsNoMembership()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None);
+
+            // act
+            var orderEngine = await CreateOrderEngine();
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            membershipMock.Verify(mock => mock.ActivateMembership(order), Times.Never);
+            packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Once);
         }
     }
 }
