@@ -16,7 +16,7 @@ namespace OrderHandling
             return handler;
         }
 
-        public async Task<Order> HandleOrder(Order order)
+        public virtual async Task<Order> HandleOrder(Order order)
         {
             if (this._nextHandler != null)
             {

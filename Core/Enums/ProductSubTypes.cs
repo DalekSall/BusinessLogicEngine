@@ -6,6 +6,7 @@ namespace Core.Enums
 {
     public enum ProductSubTypes
     {
+        None,
         Book,
         Upgrade,
     }
