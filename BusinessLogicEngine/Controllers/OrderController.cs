@@ -1,4 +1,5 @@
 ﻿using Core.Interfaces;
+using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,18 +14,21 @@ namespace BusinessLogicEngine.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> _logger;
-        private readonly IOrderEngine orderHandler;
+        private readonly IOrderEngine orderEngine;
 
-        public OrderController(ILogger<OrderController> logger, IOrderEngine orderHandler)
+        public OrderController(ILogger<OrderController> logger, IOrderEngine orderEngine)
         {
             _logger = logger;
-            this.orderHandler = orderHandler;
+            this.orderEngine = orderEngine;
         }
 
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpPost]
+        public async Task<IEnumerable<string>> Get()
         {
+            // fetch from request
+            var order = new Order();
 
+            await orderEngine.HandleOrder(order);
             return new List<string>()
             {
                 "hello",
