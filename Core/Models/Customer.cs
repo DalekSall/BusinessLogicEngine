@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Core.Models
 {
-    class Customer
+    public class Customer
     {
+        public string email { get; set; }
     }
 }

@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Core.Interfaces
 {
-    public interface IOrderHandler
+    public interface IOrderEngine
     {
-        Task<IOrderHandler> SetNext(IOrderHandler handle);
-
-        Task<Order> HandleOrder(Order order);
+        Task<bool> HandleOrder(Order order);
     }
 }
