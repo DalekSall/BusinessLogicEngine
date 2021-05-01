@@ -22,22 +22,26 @@ namespace UnitTests
         private Mock<IPackageSlipRepository> royaltySlipMock;
         private Mock<IMembershipRepository> membershipMock;
         private Mock<IEmailRepository> emailMock;
+        private Mock<IComissionRepository> comissionMock;
         private async Task<OrderEngine> CreateOrderEngine()
         {
             packageSlipMock = new Mock<IPackageSlipRepository>();
             royaltySlipMock = new Mock<IPackageSlipRepository>();
             membershipMock = new Mock<IMembershipRepository>();
             emailMock = new Mock<IEmailRepository>();
+            comissionMock = new Mock<IComissionRepository>();
             var orderSlipHandler = new OrderSlipHandler(packageSlipMock.Object);
             var royaltySlipHandler = new RoyaltySlipHandler(royaltySlipMock.Object);
             var memberShipHandler = new MembershipHandler(membershipMock.Object, emailMock.Object);
+            var comissionHandler = new ComissionHandler(comissionMock.Object);
 
+            await memberShipHandler.SetNext(comissionHandler);
             await orderSlipHandler.SetNext(memberShipHandler);
             await royaltySlipHandler.SetNext(orderSlipHandler);
             return new OrderEngine(royaltySlipHandler);
         }
 
-        private async Task<Order> CreateOrder(ProductTypes productType, ProductSubTypes productSubType)
+        private async Task<Order> CreateOrder(ProductTypes productType, ProductSubTypes productSubType, string productName = "TestProduct")
         {
             return new Order()
             {
@@ -46,7 +50,7 @@ namespace UnitTests
                 {
                     new Product()
                     {
-                        name = "testProduct",
+                        name = productName,
                         productType = productType,
                         productSubType = productSubType
                     }
@@ -197,5 +201,34 @@ namespace UnitTests
             membershipMock.Verify(mock => mock.UpgradeMembership(order), Times.Once);
             emailMock.Verify(mock => mock.SendUpgradeMail(order), Times.Once);
         }
+
+        [Fact]
+        public async void ShouldCreateAComissionPaymentToAgentIfOrderContainsPhysicalProduct()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
+
+            // act
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            comissionMock.Verify(mock => mock.AddComissionPayment(order), Times.Once);
+        }
+
+        [Fact]
+        public async void ShouldNotCreateAComissionPaymentToAgentIfOrderDoesContainsPhysicalProduct()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
+
+            // act
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            comissionMock.Verify(mock => mock.AddComissionPayment(order), Times.Never);
+        }
+
     }
 }
