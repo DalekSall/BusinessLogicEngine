@@ -24,7 +24,7 @@ namespace OrderHandling.Handlers
                 product.productSubType == Core. Enums.ProductSubTypes.Book );
             if(books.Any())
             {
-                await this.packageSlipRepository.CreatePackageSlip(order);
+                await packageSlipRepository.CreatePackageSlip(order);
             }
             return await base.HandleOrder(order);
         }

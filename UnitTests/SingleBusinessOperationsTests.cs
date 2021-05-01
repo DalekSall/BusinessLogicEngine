@@ -67,9 +67,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -81,9 +81,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -95,9 +95,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.Book);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -110,9 +110,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -125,9 +125,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -141,9 +141,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert
@@ -156,9 +156,9 @@ namespace UnitTests
         {
             // arrange
             var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.Upgrade);
+            var orderEngine = await CreateOrderEngine();
 
             // act
-            var orderEngine = await CreateOrderEngine();
             await orderEngine.HandleOrder(order);
 
             // assert

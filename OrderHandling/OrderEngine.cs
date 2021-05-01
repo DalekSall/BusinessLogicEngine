@@ -18,9 +18,9 @@ namespace OrderHandling
 
         public async Task<bool> HandleOrder(Order order)
         {
-            if(this.orderHandlerChain != null)
+            if(orderHandlerChain != null)
             {
-                await this.orderHandlerChain.HandleOrder(order);
+                await orderHandlerChain.HandleOrder(order);
             }
             return true;
         }

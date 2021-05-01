@@ -12,7 +12,7 @@ namespace OrderHandling
         private IOrderHandler _nextHandler;
         public async Task<IOrderHandler> SetNext(IOrderHandler handler)
         {
-            _nextHandler = handler;
+            this._nextHandler = handler;
             return _nextHandler;
         }
 
