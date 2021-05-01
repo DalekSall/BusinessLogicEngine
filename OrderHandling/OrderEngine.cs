@@ -7,15 +7,21 @@ using System.Threading.Tasks;
 
 namespace OrderHandling
 {
-    class OrderEngine : IOrderEngine 
+    public class OrderEngine : IOrderEngine 
     {
-        public OrderEngine (IEnumerable<IOrderHandler> orderHandlers)
-        {
 
+        private IOrderHandler orderHandlerChain;
+        public OrderEngine (IOrderHandler orderHandlerChain)
+        {
+            this.orderHandlerChain = orderHandlerChain;
         }
 
         public async Task<bool> HandleOrder(Order order)
         {
+            if(this.orderHandlerChain != null)
+            {
+                await this.orderHandlerChain.HandleOrder(order);
+            }
             return true;
         }
     }
