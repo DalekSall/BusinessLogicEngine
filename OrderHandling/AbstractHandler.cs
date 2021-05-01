@@ -12,15 +12,15 @@ namespace OrderHandling
         private IOrderHandler _nextHandler;
         public async Task<IOrderHandler> SetNext(IOrderHandler handler)
         {
-            this._nextHandler = handler;
-            return handler;
+            _nextHandler = handler;
+            return _nextHandler;
         }
 
         public virtual async Task<Order> HandleOrder(Order order)
         {
-            if (this._nextHandler != null)
+            if (_nextHandler != null)
             {
-                return await this._nextHandler.HandleOrder(order);
+                return await _nextHandler.HandleOrder(order);
             }
 
             return null;

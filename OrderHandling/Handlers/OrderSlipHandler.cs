@@ -22,9 +22,9 @@ namespace OrderHandling.Handlers
             var physicalProducts = order.Products.ToList().Where(product => product.productType == Core.Enums.ProductTypes.PhysicalProduct);
             if(physicalProducts.Any())
             {
-                await this.packageSlipRepository.CreatePackageSlip(order);
+                await packageSlipRepository.CreatePackageSlip(order);
             }
-            return order;
+            return await base.HandleOrder(order);
         }
     }
 }
