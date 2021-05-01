@@ -2,6 +2,7 @@
 using Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,11 @@ namespace OrderHandling.Handlers
 
         public async override Task<Order> HandleOrder (Order order)
         {
-            await this.packageSlipRepository.CreatePackageSlip(order);
+            var physicalProducts = order.Products.ToList().Where(product => product.productType == Core.Enums.ProductTypes.PhysicalProduct);
+            if(physicalProducts.Any())
+            {
+                await this.packageSlipRepository.CreatePackageSlip(order);
+            }
             return order;
         }
     }
