@@ -32,11 +32,13 @@ namespace UnitTests
             comissionMock = new Mock<IComissionRepository>();
             var orderSlipHandler = new OrderSlipHandler(packageSlipMock.Object);
             var royaltySlipHandler = new RoyaltySlipHandler(royaltySlipMock.Object);
-            var memberShipHandler = new MembershipHandler(membershipMock.Object, emailMock.Object);
+            var upgradeMembershipHandler = new UpgradeMembershipHandler(membershipMock.Object, emailMock.Object);
+            var activateMembershipHandler = new ActivateMembershipHandler(membershipMock.Object, emailMock.Object);
             var comissionHandler = new ComissionHandler(comissionMock.Object);
 
-            await memberShipHandler.SetNext(comissionHandler);
-            await orderSlipHandler.SetNext(memberShipHandler);
+            await upgradeMembershipHandler.SetNext(comissionHandler);
+            await activateMembershipHandler.SetNext(upgradeMembershipHandler);
+            await orderSlipHandler.SetNext(activateMembershipHandler);
             await royaltySlipHandler.SetNext(orderSlipHandler);
             return new OrderEngine(royaltySlipHandler);
         }

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace OrderHandling.Handlers
 {
-    public class MembershipHandler : AbstractHandler
+    public class UpgradeMembershipHandler : AbstractHandler
     {
         private readonly IMembershipRepository membershipRepository;
         private readonly IEmailRepository emailRepository;
 
-        public MembershipHandler (IMembershipRepository membershipRepository, IEmailRepository emailRepository)
+        public UpgradeMembershipHandler (IMembershipRepository membershipRepository, IEmailRepository emailRepository)
         {
             this.membershipRepository = membershipRepository;
             this.emailRepository = emailRepository;
@@ -21,17 +21,6 @@ namespace OrderHandling.Handlers
 
         public async override Task<Order> HandleOrder (Order order)
         {
-            var memberShips = order.Products.ToList().Where( product => 
-                product.productType == Core.Enums.ProductTypes.Membership &&
-                product.productSubType != Core.Enums.ProductSubTypes.Upgrade
-            );
-
-            if (memberShips.Any())
-            {
-                await handleActivation(order);
-
-            }
-
             var upgrades = order.Products.ToList().Where( product => 
                 product.productType == Core.Enums.ProductTypes.Membership &&
                 product.productSubType == Core.Enums.ProductSubTypes.Upgrade
@@ -43,17 +32,6 @@ namespace OrderHandling.Handlers
             }
             
             return await base.HandleOrder(order);
-        }
-
-        private async Task<bool> handleActivation (Order order)
-        {
-            var activated = await membershipRepository.ActivateMembership(order);
-            if(activated)
-            {
-                return await emailRepository.SendActivationMail(order);
-            }
-
-            return false;
         }
 
         private async Task<bool> handleUpgrade(Order order)
