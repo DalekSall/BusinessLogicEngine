@@ -230,5 +230,20 @@ namespace UnitTests
             comissionMock.Verify(mock => mock.AddComissionPayment(order), Times.Never);
         }
 
+        [Fact(Skip = "Should be handled by package slip service")]
+        public async void ShouldAddFirstAidToPackagingSlipToOrderIfLearningToSkiVideo()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None, "learning To Ski");
+            var orderEngine = await CreateOrderEngine();
+
+            // act
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            // the logic for a package slip neither belongs to the handler, nor the repository
+            // since it's product specific. There should be a layer between the handler and
+            // the repository handling the additions to the slip. 
+        }
     }
 }
