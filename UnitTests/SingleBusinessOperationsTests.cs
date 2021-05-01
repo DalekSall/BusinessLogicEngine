@@ -84,7 +84,7 @@ namespace UnitTests
         public async void ShouldCreatePackingSlipForBothRoyaltyDepartmentAndCustomerIfPhysicalProductIsABook()
         {
             // arrange
-            var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.None);
+            var order = await CreateOrder(ProductTypes.PhysicalProduct, ProductSubTypes.Book);
 
             // act
             var orderEngine = await CreateOrderEngine();
@@ -93,6 +93,21 @@ namespace UnitTests
             // assert
             packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Once);
             royaltySlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Once);
+        }
+
+        [Fact]
+        public async void ShouldNotCreateAnyPackagingSlipsIfNoPhysicalProductIsPresent()
+        {
+            // arrange
+            var order = await CreateOrder(ProductTypes.Membership, ProductSubTypes.None);
+
+            // act
+            var orderEngine = await CreateOrderEngine();
+            await orderEngine.HandleOrder(order);
+
+            // assert
+            packageSlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
+            royaltySlipMock.Verify(mock => mock.CreatePackageSlip(order), Times.Never);
         }
     }
 }
